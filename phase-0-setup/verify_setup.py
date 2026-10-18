@@ -21,6 +21,7 @@ so you can test them without touching the cloud — see ``tests/test_units.py``.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -48,10 +49,22 @@ def parse_gcloud_config(raw: str) -> dict:
     Args:
         raw: the raw stdout string from the gcloud command (may be empty).
     """
-    # TODO: parse `raw` as JSON and return {"account": ..., "project": ...}
-    #       from the "core" section. Return empty strings if raw is empty or a
-    #       field is missing.
-    raise NotImplementedError("Phase 0: implement parse_gcloud_config()")
+    empty = {"account": "", "project": ""}
+    if not raw or not raw.strip():
+        return empty
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return empty
+    if not isinstance(data, dict):
+        return empty
+    core = data.get("core")
+    if not isinstance(core, dict):
+        return empty
+    return {
+        "account": str(core.get("account") or ""),
+        "project": str(core.get("project") or ""),
+    }
 
 
 def parse_repo_slug(remote_url: str) -> str:
@@ -67,11 +80,28 @@ def parse_repo_slug(remote_url: str) -> str:
     Args:
         remote_url: output of ``git remote get-url origin`` (may be empty).
     """
-    # TODO: return "owner/repo" for both the HTTPS and SSH forms shown above.
-    #       Strip any trailing ".git". Return "" if not a github.com URL.
-    raise NotImplementedError("Phase 0: implement parse_repo_slug()")
+    url = (remote_url or "").strip()
+    if not url:
+        return ""
 
+    if url.startswith("git@github.com:"):
+        path = url[len("git@github.com:"):]
+    else:
+        match = re.match(
+            r"^(?:https?|ssh|git)://(?:[^@/]+@)?github\.com(?::\d+)?/(.+)$", url
+        )
+        if not match:
+            return ""
+        path = match.group(1)
 
+    path = path.strip("/")
+    if path.endswith(".git"):
+        path = path[: -len(".git")]
+
+    parts = path.split("/")
+    if len(parts) != 2 or not all(parts):
+        return ""
+    return f"{parts[0]}/{parts[1]}"
 # --------------------------------------------------------------------------- #
 # Provided probes (do not modify)
 # --------------------------------------------------------------------------- #
