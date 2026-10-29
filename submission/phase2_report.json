@@ -1,0 +1,30 @@
+{
+  "phase": "2",
+  "environment": {
+    "colab": true
+  },
+  "attention": {
+    "naive_ms": 401.813,
+    "vectorized_ms": 20.005,
+    "speedup": 20.09
+  },
+  "threads": {
+    "1": 2170.851,
+    "2": 1971.366,
+    "4": 2333.673,
+    "8": 2377.225
+  },
+  "devices": {
+    "cpu_ms": 438758.2,
+    "gpu_ms": 13191.8
+  },
+  "training": {
+    "steps": 2000,
+    "final_loss": 1.4311,
+    "param_count": 4935680
+  },
+  "sample": "\nMost nigh. Will betwivit you, a tike, a panishence.\n\nKING HENRY VI:\nWhat ever to there cannot Romeo, I smy born.\n\nPETRUCHIO:\nGaunt till the vessain assur alook\nBiarcars. You thou a know sy some friend",
+  "model": {
+    "gcs_url": "https://storage.googleapis.com/eurecomgpt-512013-eurecomgpt/model.safetensors"
+  }
+}
