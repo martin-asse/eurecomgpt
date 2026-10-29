@@ -30,23 +30,27 @@ def attention_naive(Q: np.ndarray, K: np.ndarray, V: np.ndarray) -> np.ndarray:
         out[i] = sum_j weights[i,j] * V[j]
     Loop over the query index ``i`` and key index ``j`` — do NOT use ``Q @ K.T``.
     """
-    T, d = Q.shape
-    scale = 1.0 / np.sqrt(d)
-    scores = np.empty((T, T))
+    T,d = np.shape(Q)
+    scores = np.zeros((T,T))
     for i in range(T):
-        for j in range(T):
-            scores[i, j] = float(np.dot(Q[i], K[j])) * scale
+        for j in range(T) :
+            scores[i, j] = (np.dot(Q[i],K[j])) / np.sqrt(d)
     weights = softmax(scores, axis=-1)
-    out = np.zeros((T, d))
+    out = np.zeros((T,d))
     for i in range(T):
-        for j in range(T):
-            out[i] += weights[i, j] * V[j]
+        tmp = np.zeros(d)
+        for j in range(T) :
+            tmp+=weights[i,j]*V[j]
+        out[i]=tmp
     return out
 
 
 def attention_vectorized(Q: np.ndarray, K: np.ndarray, V: np.ndarray) -> np.ndarray:
     """The same attention using vectorized matrix ops — no Python loops over positions."""
-    d = Q.shape[1]
-    scores = (Q @ K.T) / np.sqrt(d)
-    weights = softmax(scores, axis=-1)
-    return weights @ V
+    T,d = np.shape(Q)
+    scores = Q @ K.T / np.sqrt(d)     
+    weights = softmax(scores, axis=-1) 
+    return weights @ V    
+
+Q, K, V = (np.random.randn(5, 4) for _ in range(3))
+print(np.allclose(attention_naive(Q, K, V), attention_vectorized(Q, K, V)))
